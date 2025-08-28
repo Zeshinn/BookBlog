@@ -144,6 +144,7 @@ async def blog(request: Request, post_id: int, db: db_dependency):
         })
 
 
-@app.get("/ping")
-async def ping():
-    return {"status": "ok", "timestamp": datetime.datetime.utcnow()}
+@app.head("/ping")
+async def ping_head():
+    return {}
+
