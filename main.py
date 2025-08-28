@@ -18,7 +18,12 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-app = FastAPI()
+
+app = FastAPI(
+    docs_url=None,        # disable Swagger UI
+    redoc_url=None,       # disable ReDoc
+    openapi_url=None      # disable OpenAPI schema
+)
 templates = Jinja2Templates(directory="templates")
 models.Base.metadata.create_all(bind=engine)
 
@@ -139,4 +144,6 @@ async def blog(request: Request, post_id: int, db: db_dependency):
         })
 
 
-
+@app.get("/ping")
+async def ping():
+    return {"status": "ok", "timestamp": datetime.datetime.utcnow()}
