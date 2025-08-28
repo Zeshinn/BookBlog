@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Бакърика - Архив</title>
+</head>
+<body class="bg-stone-600">
+    <div class="flex justify-center">
+        <h1 class="inline-block text-center font-serif text-stone-400 text-5xl text-shadow-lg text-shadow-teal-950 transition-all duration-300 ease-in-out hover:text-shadow-rose-950">Архив</h1>
+    </div>
+    <div class="mt-6 w-full px-3 font-serif">
+        <div class="flex justify-center mt-2 w-full px-3">
+            <div class="bg-stone-800 w-xl border-1 border-solid text-stone-400 p-3 overflow-auto max-h-90">
+                <table class="table-fixed border-collapse">
+                    <thead>
+                        <tr>
+                          <th class="px-1">Заглавие</th>
+                          <th class="px-1">Автор</th>
+                          <th class="px-1">Създадено</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for post in posts %}
+                        <tr class="border-1 hover:bg-stone-400 hover:text-stone-800 transition-all duration-300 ease-in-out">
+                            <td class="border-1 p-1">{{ post.title }}</td>
+                            <td class="border-1 text-center">{{ post.author }}</td>
+                            <td class="border-1 text-center">{{ post.created_at }}</td>
+                            <td class="border-1 text-center p-1">
+                            <a href="/blog/{{ post.id }}">Прочети</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-center mt-3">
+        <a href="/" class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Начало</a>
+        <a href="#"class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Галерия</a>
+    </div>
+</body>
+</html>

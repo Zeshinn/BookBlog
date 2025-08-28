@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Бакърика - Създаване на статия</title>
+    <style>
+        *{
+            scrollbar-color: oklch(26.8% 0.007 34.298) oklch(14.7% 0.004 49.25);
+        }
+        textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body class="bg-stone-600">
+    <div class="flex justify-center">
+        <h1 class="inline-block text-center font-serif text-stone-400 text-5xl text-shadow-lg text-shadow-teal-950 transition-all duration-300 ease-in-out hover:text-shadow-rose-950">Бакърика</h1>
+    </div>
+    <div class="flex justify-center mt-3">
+        <p class="inline-block font-serif text-xl text-stone-400 px-3 text-center">Тука се пишат яките статии.</p>
+    </div>
+    <div class="mt-6 w-full px-3">
+        <div class="flex justify-center mt-2 w-full px-3">
+            <div class="bg-stone-800 w-xl border-1 border-solid text-stone-400 p-3 overflow-auto max-h-90">
+                <form action="/write" id="blog_form" method="POST">
+                    <div class="flex justify-center">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="text" name="title" id="title" placeholder="Заглавие">
+                    </div>
+                    <div class="flex justify-center mt-3">
+                        <textarea form="blog_form" required class="border-1 p-1 w-full h-50 focus:outline-none" name="text" id="text"></textarea>
+                    </div>
+                    <div class="flex justify-center mt-5">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="text" name="username" id="username" placeholder="Име">
+                    </div>
+                    <div class="flex justify-center mt-1">
+                        <input form="blog_form" requiredt class="border-1 p-1 focus:outline-none" type="password" name="password" id="password" placeholder="Паролка батио">
+                    </div>
+                    <div class="flex justify-center mt-1">
+                        <input form="blog_form" class="border-1 p-1 focus:outline-none text-stone-800 bg-stone-400 p-1 px-2 hover:cursor-pointer rounded-sm" type="submit" name="submit" id="submit" value="Запиши">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

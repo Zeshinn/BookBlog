@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Бакърика - Статия</title>
+    <style>
+        * {
+            scrollbar-color: oklch(26.8% 0.007 34.298) oklch(14.7% 0.004 49.25);
+          }
+    </style>
+</head>
+<body class="bg-stone-600">
+    <div class="flex justify-center">
+        <h1 class="inline-block text-center font-serif text-stone-400 text-5xl text-shadow-lg text-shadow-teal-950 transition-all duration-300 ease-in-out hover:text-shadow-rose-950">Бакърика</h1>
+    </div>
+    <div class="mt-6 w-full px-3">
+        <div class="flex justify-center mt-2 w-full px-3">
+            <h2 class="inline-block font-serif text-xl text-stone-400 px-3 text-center">{{created_at}}</h2>
+        </div>
+        <div class="flex justify-center mt-2 w-full px-3">
+            <div class="bg-stone-800 w-full max-w-xl border border-solid text-stone-400 p-3 
+                        overflow-y-auto overflow-x-hidden break-words max-h-96">
+                <h3 class="mb-3"><b>{{title}}</b></h3>
+                <p>{{text | safe}}</p>
+            </div>
+        </div>
+    
+        <!-- Author -->
+        <div class="flex justify-center mt-1 w-full px-3">
+            <h2 class="inline-block font-serif text-md text-stone-800 px-3 text-center">
+                <b>Автор: {{author}}</b>
+            </h2>
+        </div>
+    </div>
+    <div class="flex justify-center mt-3">
+        <a href="/"class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Начало</a>
+        <a href="/archive" class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Архив</a>
+        <a href="/#"class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Галерия</a>
+    </div>
+</body>
+</html>
