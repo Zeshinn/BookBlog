@@ -138,32 +138,5 @@ async def blog(request: Request, post_id: int, db: db_dependency):
             "created_at": post.created_at.strftime("%Y-%m-%d")
         })
 
-@app.post("/users", response_model=UserResponse)
-async def create_users(user: UserCreate, db: db_dependency):
-    hashed_pw = hash_password(user.password)
-    db_user = models.Users(username=user.username, password=hashed_pw, created_at=datetime.datetime.now())
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
 
-@app.get("/users", response_model=List[UserResponse])
-async def get_users(db: db_dependency):
-    return db.query(models.Users).all()
-
-@app.post("/posts", response_model=PostResponse)
-async def create_post(post: PostCreate, db: db_dependency):
-    user = db.query(models.Users).filter(models.Users.id == post.user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    db_post = models.Posts(title=post.title, text=post.text, user_id=post.user_id, created_at=datetime.datetime.now())
-    db.add(db_post)
-    db.commit()
-    db.refresh(db_post)
-    return db_post
-
-@app.get("/posts", response_model=List[PostResponse])
-async def get_posts(db: db_dependency):
-    return db.query(models.Posts).all()
 
