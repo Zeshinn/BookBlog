@@ -37,7 +37,6 @@ app = FastAPI(
     redoc_url=None,       # disable ReDoc
     openapi_url=None      # disable OpenAPI schema
 )
-app.mount("/templates/resources", StaticFiles(directory="templates/resources"), name="resources")
 templates = Jinja2Templates(directory="templates")
 models.Base.metadata.create_all(bind=engine)
 
