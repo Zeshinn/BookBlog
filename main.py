@@ -1,14 +1,17 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Form
+from fastapi import FastAPI, HTTPException, Depends, Request, Form, UploadFile, File
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Annotated
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-import datetime
+import datetime, shutil, os
 from sqlalchemy import desc
 from passlib.context import CryptContext
+from PIL import Image
+import time
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,6 +27,7 @@ app = FastAPI(
     redoc_url=None,       # disable ReDoc
     openapi_url=None      # disable OpenAPI schema
 )
+app.mount("/templates/resources", StaticFiles(directory="templates/resources"), name="resources")
 templates = Jinja2Templates(directory="templates")
 models.Base.metadata.create_all(bind=engine)
 
@@ -66,11 +70,34 @@ class PostResponse(BaseModel):
 @app.get('/')
 async def home(request: Request, db: db_dependency):
     latest_post = db.query(models.Posts).order_by(desc(models.Posts.created_at)).first()
-    if not latest_post:
-         return templates.TemplateResponse('home.html', {"request": request, "title": "", "text": "", "author": ""})
+    latest_song = db.query(models.Song).order_by(desc(models.Song.created_at)).first()
+    if not latest_post :
+         return templates.TemplateResponse('home.html',
+                                            {
+                                                "request": request,
+                                                "title": "",
+                                                "text": "",
+                                                "author": "",
+                                                "song_title": "",
+                                                "group": "",
+                                                "singer": "",
+                                                "timestamp": int(time.time())
+                                                })
     author = db.query(models.Users).filter(models.Users.id == latest_post.user_id).first()
     author_name = author.username if author else "Unknown"
-    return templates.TemplateResponse('home.html', {"request": request, "title": latest_post.title, "text": latest_post.text, "author": author_name})
+    singer = db.query(models.Users).filter(models.Users.id == latest_song.user_id).first()
+    singer_name = singer.username if author else "Unknown"
+    return templates.TemplateResponse('home.html',
+                                      {
+                                          "request": request,
+                                          "title": latest_post.title,
+                                          "text": latest_post.text,
+                                          "author": author_name,
+                                          "song_title": latest_song.title,
+                                          "group": latest_song.group,
+                                          "singer": singer_name,
+                                          "timestamp": int(time.time())
+                                          })
 
 @app.get('/archive')
 async def archive(request: Request, db: db_dependency):
@@ -128,6 +155,11 @@ async def blog_write(
     return RedirectResponse(url="/", status_code=303)
 
 
+@app.get("/song")
+async def get_song(request: Request):
+    return templates.TemplateResponse("song.html", {"request": request})
+
+
 @app.get('/blog/{post_id}')
 async def blog(request: Request, post_id: int, db: db_dependency):
     post = db.query(models.Posts).filter(models.Posts.id == post_id).first()
@@ -143,6 +175,53 @@ async def blog(request: Request, post_id: int, db: db_dependency):
             "created_at": post.created_at.strftime("%Y-%m-%d")
         })
 
+@app.get("/write")
+async def get_blog_write(request: Request):
+    return templates.TemplateResponse("blogWrite.html", {"request": request})
+
+@app.post("/song")
+async def create_song(
+    request: Request,
+    db: db_dependency,
+    title: str = Form(...),
+    text: str = Form(...),
+    image: UploadFile = File(...),
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    # 1. Check if user exists
+    user = db.query(models.Users).filter(models.Users.username == username).first()
+    if not user or not verify_password(password, user.password):
+        return templates.TemplateResponse(
+            "song.html",
+            {"request": request, "error": "Невалидни потребителско име или парола."},
+            status_code=400
+        )
+
+    uploads_dir = "templates/resources"
+    os.makedirs(uploads_dir, exist_ok=True)
+    file_path = os.path.join(uploads_dir, "song.jpg")
+
+    img = Image.open(image.file)
+
+    # Ensure compatible format for JPEG
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+
+    img.save(file_path, format="JPEG")
+
+    db_song = models.Song(
+        title=title,
+        group=text,
+        image=file_path,   # save normalized path
+        user_id=user.id,
+        created_at=datetime.datetime.now()
+    )
+    db.add(db_song)
+    db.commit()
+    db.refresh(db_song)
+
+    return RedirectResponse(url="/", status_code=303)
 
 @app.head("/ping")
 async def ping_head():

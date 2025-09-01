@@ -44,8 +44,19 @@
     </div>
     
     <div class="flex justify-center mt-3">
-        <a href="/archive" class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Архив</a>
-        <a href="#"class="border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Галерия</a>
+        <a href="/archive" class="font-serif border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Архив</a>
+        <a href="#"class="font-serif border-1 bg-stone-700  text-stone-400 mx-2 cursor-pointer border-solid p-1 text-md hover:bg-stone-800 hover:border-dashed hover:rounded-sm transition duration-300 ease-in-out">Галерия</a>
+    </div>
+    <div class="flex justify-center mt-5">
+        <p class="inline-block font-serif text-xl text-stone-400 px-3 text-center">Песен на деня</p>
+    </div>
+    <div class="flex justify-center mt-2 mb-2 font-serif">
+        <img src="templates/resources/song.jpg?{{ timestamp }}" alt="album cover" class="mx-1 max-w-24 max-h-24">
+        <div class="mx-1">
+            <h2 class="text-stone-400 text-lg display-inline-block">{{song_title}}</h2>
+            <p class="text-stone-400 text-md display-inline-block">{{group}}</p>
+            <p class="text-stone-800 text-md display-inline-block">Оставил: {{singer}}</p>
+        </div>
     </div>
 </body>
 </html>

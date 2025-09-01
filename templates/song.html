@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Бакърика - Създаване на песен</title>
+</head>
+<body class="bg-stone-600">
+    <div class="flex justify-center">
+        <h1 class="inline-block text-center font-serif text-stone-400 text-5xl text-shadow-lg text-shadow-teal-950 transition-all duration-300 ease-in-out hover:text-shadow-rose-950">Бакърика</h1>
+    </div>
+    <div class="flex justify-center mt-3">
+        <p class="inline-block font-serif text-xl text-stone-400 px-3 text-center">Тук се слага яката музика.</p>
+    </div>
+    <div class="mt-6 w-full px-3">
+        <div class="flex justify-center mt-2 w-full px-3">
+            <div class="bg-stone-800 w-xl border-1 border-solid text-stone-400 p-3 overflow-auto max-h-90">
+                <form action="/song" id="blog_form" method="POST" enctype="multipart/form-data">
+                    <div class="flex justify-center">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="text" name="title" id="title" placeholder="Име на песента">
+                    </div>
+                    <div class="flex justify-center mt-3">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="text" name="text" id="text" placeholder="Име на изпълнителя">
+                    </div>
+                    <div class="flex justify-center mt-3">
+                        <label for="image">Избери снимка за песента</label>
+                    </div>
+                    <div class="flex justify-center mt-1">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="file" name="image" id="image" placeholder="Снимка на албум">
+                    </div>
+                    <div class="flex justify-center mt-5">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="text" name="username" id="username" placeholder="Име">
+                    </div>
+                    <div class="flex justify-center mt-1">
+                        <input form="blog_form" required class="border-1 p-1 focus:outline-none" type="password" name="password" id="password" placeholder="Паролка батио">
+                    </div>
+                    <div class="flex justify-center mt-1">
+                        <input form="blog_form" class="border-1 p-1 focus:outline-none text-stone-800 bg-stone-400 p-1 px-2 hover:cursor-pointer rounded-sm" type="submit" name="submit" id="submit" value="Запиши">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

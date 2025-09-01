@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 
+
+load_dotenv()
 database_url = os.environ["DATABASE_URL"]
 
 if not database_url:
