@@ -12,7 +12,17 @@ from sqlalchemy import desc
 from passlib.context import CryptContext
 from PIL import Image
 import time
+from google.cloud import storage
+import json
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# Initialize GCS client
+creds_dict = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+storage_client = storage.Client.from_service_account_info(creds_dict)
+bucket_name = "bakurika"
+bucket = storage_client.bucket(bucket_name)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
@@ -198,22 +208,16 @@ async def create_song(
             status_code=400
         )
 
-    uploads_dir = "templates/resources"
-    os.makedirs(uploads_dir, exist_ok=True)
-    file_path = os.path.join(uploads_dir, "song.jpg")
+    # 2. Upload to Google Cloud Storage (overwrite song.jpg)
+    blob = bucket.blob("songs/song.jpg")  # fixed name → overwrites
+    image.file.seek(0)  # reset file pointer before upload
+    blob.upload_from_file(image.file, content_type=image.content_type)
 
-    img = Image.open(image.file)
-
-    # Ensure compatible format for JPEG
-    if img.mode in ("RGBA", "P"):
-        img = img.convert("RGB")
-
-    img.save(file_path, format="JPEG")
-
+    # 3. Save DB entry with public URL
     db_song = models.Song(
         title=title,
         group=text,
-        image=file_path,   # save normalized path
+        image=f"https://storage.googleapis.com/{bucket_name}/songs/song.jpg",  # fixed public URL
         user_id=user.id,
         created_at=datetime.datetime.now()
     )
