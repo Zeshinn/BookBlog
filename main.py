@@ -7,7 +7,7 @@ from typing import List, Annotated
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-import datetime, shutil, os
+import datetime, shutil, os, re, requests, io
 from sqlalchemy import desc
 from passlib.context import CryptContext
 from PIL import Image
@@ -15,6 +15,7 @@ import time
 from google.cloud import storage
 import json
 from dotenv import load_dotenv
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -188,17 +189,65 @@ async def blog(request: Request, post_id: int, db: db_dependency):
 async def get_blog_write(request: Request):
     return templates.TemplateResponse("blogWrite.html", {"request": request})
 
+def get_spotify_metadata(spotify_url: str):
+    """Fetch title, artist, and album cover from a Spotify link (no auth)."""
+
+    # 1. Try oEmbed first
+    api_url = "https://open.spotify.com/oembed"
+    resp = requests.get(api_url, params={"url": spotify_url})
+    resp.raise_for_status()
+    data = resp.json()
+
+    title = data.get("title")
+    artist = data.get("author_name")  # may be missing
+    thumbnail = data.get("thumbnail_url")
+
+    # 2. If author_name or thumbnail missing → fallback to scraping
+    if not artist or not thumbnail:
+        page = requests.get(spotify_url, headers={"User-Agent": "Mozilla/5.0"})
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        if not title:
+            title = soup.find("meta", property="og:title")
+            if title: 
+                title = title["content"]
+
+        if not artist:
+            desc = soup.find("meta", property="og:description")
+            if desc:
+                # "Rick Astley · Song · 1987" → take first part before " · "
+                artist = desc["content"].split("·")[0].strip()
+
+        if not thumbnail:
+            og_image = soup.find("meta", property="og:image")
+            if og_image:
+                thumbnail = og_image["content"]
+
+    # 3. Upgrade cover to largest size if possible
+    high_res = None
+    if thumbnail:
+        high_res = re.sub(r"(\d{3,4})x(\d{3,4})", "1200x1200", thumbnail)
+
+    return {
+        "title": title or "Unknown Title",
+        "artist": artist or "Unknown Artist",
+        "album_cover": high_res,
+        "spotify_link": spotify_url
+    }
+
 @app.post("/song")
 async def create_song(
     request: Request,
     db: db_dependency,
-    title: str = Form(...),
-    text: str = Form(...),
-    image: UploadFile = File(...),
+    mode: str = Form(...),  # <-- get mode (spotify/manual)
+    title: str = Form(None),
+    text: str = Form(None),
+    image: UploadFile = File(None),
+    spotify_url: str = Form(None),
     username: str = Form(...),
     password: str = Form(...),
 ):
-    # 1. Check if user exists
+    # 1. Check user
     user = db.query(models.Users).filter(models.Users.username == username).first()
     if not user or not verify_password(password, user.password):
         return templates.TemplateResponse(
@@ -207,16 +256,55 @@ async def create_song(
             status_code=400
         )
 
-    # 2. Upload to Google Cloud Storage (overwrite song.jpg)
-    blob = bucket.blob("songs/song.jpg")  # fixed name → overwrites
-    image.file.seek(0)  # reset file pointer before upload
-    blob.upload_from_file(image.file, content_type=image.content_type)
+    # 2. Handle based on mode
+    if mode == "spotify":
+        if not spotify_url:
+            return templates.TemplateResponse(
+                "song.html",
+                {"request": request, "error": "Моля, въведи Spotify линк."},
+                status_code=400
+            )
 
-    # 3. Save DB entry with public URL
+        meta = get_spotify_metadata(spotify_url)
+        song_title = meta["title"]
+        song_group = meta["artist"]
+        cover_url = meta["album_cover"]
+        song_image = None
+        if cover_url:
+            resp = requests.get(cover_url, stream=True)
+            resp.raise_for_status()
+            blob = bucket.blob("songs/song.jpg")  # ⚠️ still overwrites!
+            blob.upload_from_file(io.BytesIO(resp.content), content_type="image/jpeg")
+            song_image = f"https://storage.googleapis.com/{bucket_name}/songs/song.jpg"
+    elif mode == "manual":
+        if not (title and text and image):
+            return templates.TemplateResponse(
+                "song.html",
+                {"request": request, "error": "Моля, въведи ръчно име, изпълнител и снимка."},
+                status_code=400
+            )
+
+        song_title = title
+        song_group = text
+
+        # Upload provided image to Google Cloud Storage
+        blob = bucket.blob("songs/song.jpg")  # ⚠️ fixed name → overwrites
+        image.file.seek(0)
+        blob.upload_from_file(image.file, content_type=image.content_type)
+        song_image = f"https://storage.googleapis.com/{bucket_name}/songs/song.jpg"
+
+    else:
+        return templates.TemplateResponse(
+            "song.html",
+            {"request": request, "error": "Невалиден избор за начин на въвеждане."},
+            status_code=400
+        )
+
+    # 3. Save DB entry
     db_song = models.Song(
-        title=title,
-        group=text,
-        image=f"https://storage.googleapis.com/{bucket_name}/songs/song.jpg",  # fixed public URL
+        title=song_title,
+        group=song_group,
+        image=song_image,
         user_id=user.id,
         created_at=datetime.datetime.now()
     )
@@ -225,6 +313,7 @@ async def create_song(
     db.refresh(db_song)
 
     return RedirectResponse(url="/", status_code=303)
+
 
 @app.head("/ping")
 async def ping_head():
