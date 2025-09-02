@@ -91,6 +91,7 @@ async def home(request: Request, db: db_dependency):
                                                 "song_title": "",
                                                 "group": "",
                                                 "singer": "",
+                                                "song_link": "#",
                                                 "timestamp": int(time.time())
                                                 })
     author = db.query(models.Users).filter(models.Users.id == latest_post.user_id).first()
@@ -106,6 +107,7 @@ async def home(request: Request, db: db_dependency):
                                           "song_title": latest_song.title,
                                           "group": latest_song.group,
                                           "singer": singer_name,
+                                          "song_link": latest_song.link,
                                           "timestamp": int(time.time())
                                           })
 
@@ -273,7 +275,7 @@ async def create_song(
         if cover_url:
             resp = requests.get(cover_url, stream=True)
             resp.raise_for_status()
-            blob = bucket.blob("songs/song.jpg")  # ⚠️ still overwrites!
+            blob = bucket.blob("songs/song.jpg")  #still overwrites!
             blob.upload_from_file(io.BytesIO(resp.content), content_type="image/jpeg")
             song_image = f"https://storage.googleapis.com/{bucket_name}/songs/song.jpg"
     elif mode == "manual":
@@ -305,6 +307,7 @@ async def create_song(
         title=song_title,
         group=song_group,
         image=song_image,
+        link=spotify_url if mode == "spotify" else None,
         user_id=user.id,
         created_at=datetime.datetime.now()
     )

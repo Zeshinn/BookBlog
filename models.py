@@ -25,5 +25,6 @@ class Song(Base):
     title = Column(String, nullable=False)
     group = Column(String, nullable=False)
     image = Column(String)  # store image path or URL
+    link = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))

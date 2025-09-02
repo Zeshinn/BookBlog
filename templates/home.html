@@ -51,7 +51,13 @@
         <p class="inline-block font-serif text-xl text-stone-400 px-3 text-center">Песен на деня</p>
     </div>
     <div class="flex justify-center mt-2 mb-2 font-serif">
-        <img src="https://storage.googleapis.com/bakurika/songs/song.jpg?{{ timestamp }}" alt="album cover" class="mx-1 max-w-24 max-h-24">
+            {% if song_link %}
+                <a href="{{ song_link }}" target="_blank" rel="noopener">
+                    <img class="mx-1 max-w-24 max-h-24" src="https://storage.googleapis.com/bakurika/songs/song.jpg?{{timestamp}}" alt="{{ song_title }}" style="max-width: 300px; border-radius: 8px;">
+                </a>
+            {% else %}
+                <img class="mx-1 max-w-24 max-h-24" src="https://storage.googleapis.com/bakurika/songs/song.jpg?{{timestamp}}" alt="{{ song_title }}" style="max-width: 300px; border-radius: 8px;">
+            {% endif %}
         <div class="mx-1">
             <h2 class="text-stone-400 text-lg display-inline-block">{{song_title}}</h2>
             <p class="text-stone-400 text-md display-inline-block">{{group}}</p>
